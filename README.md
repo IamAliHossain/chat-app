@@ -36,3 +36,30 @@ cd chat-app-backend
 # Run the Spring Boot server
 ./mvnw spring-boot:run
 
+
+cd frontend-chat
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
+
+
+# Usage
+
+Start the backend server.
+
+Start the frontend React app.
+
+Open your browser at http://localhost:3000 (or the port your React app runs on) to start chatting.
+
+
+# Technologies Used
+
+Frontend: React, HTML, CSS
+
+Backend: Spring Boot, Lombok
+
+Database: MongoDB
+
+Real-time communication: WebSocket, STOMP.js
