@@ -6,10 +6,18 @@ import { baseURL } from "../config/AxiosHelper";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import toast from "react-hot-toast";
-
+import { getMessages } from "../services/RoomService";
+import { timeAgo } from "../config/helper";
 
 const ChatPage = () => {
-    const {roomId, currentUser, connected} = useChatContext();
+    const {
+        roomId, 
+        currentUser, 
+        connected, 
+        setConnected, 
+        setRoomId, 
+        setCurrentUser
+    } = useChatContext();
     // console.log(roomId)
     // console.log(currentUser)
     // console.log(connected)
@@ -23,22 +31,22 @@ const ChatPage = () => {
 
 
     const [messages, setMessages] = useState([
-    {
-        content : "hello ?",
-        sender : "Hasan Morshed",
-    },
-    {
-        content : "hi!",
-        sender : "Ali Hossain",
-    },
-    {
-        content : "how are you my friend?",
-        sender : "Hasan Morshed",
-    },
-    {
-        content : "not bad & not good also",
-        sender : "Ali Hossain",
-    },
+    // {
+    //     content : "hello ?",
+    //     sender : "Hasan Morshed",
+    // },
+    // {
+    //     content : "hi!",
+    //     sender : "Ali Hossain",
+    // },
+    // {
+    //     content : "how are you my friend?",
+    //     sender : "Hasan Morshed",
+    // },
+    // {
+    //     content : "not bad & not good also",
+    //     sender : "Ali Hossain",
+    // },
 
 ]);
 
@@ -49,6 +57,35 @@ const [stompClient, setStompClient] = useState(null)
 
     // page initialize : 
     // now message should be loaded 
+
+    useEffect(() =>{
+        async function loadMessages(){
+            try{
+                const messages = await getMessages(roomId);
+                console.log(messages);
+                setMessages(messages)
+            }catch(error){}
+        }
+        if(connected){ 
+            loadMessages();
+        }
+    }, []);
+
+
+    //scroll down
+
+    useEffect(() =>{
+
+        if(chatBoxRef.current){
+            chatBoxRef.current.scroll({
+                top:chatBoxRef.current.scrollHeight,
+                behavior: "smooth",
+            });
+        }
+
+    }, [messages]);
+
+
 
     // stomp client will be initialized
         // subscribe korbe group ke
@@ -63,17 +100,22 @@ const [stompClient, setStompClient] = useState(null)
 
                 setStompClient(client);
                 toast.success("Connected");
+
                 client.subscribe(`/topic/room/${roomId}`, (message) =>{
                     console.log(message);
 
                     const newMessage = JSON.parse(message.body);
+
                     setMessages((prev) => [...prev, newMessage]);
+
+                    // rest of the work after success receiving the message
                 });
             });
         };
 
-
-        connectWebSocket();
+        if(connected){ 
+            connectWebSocket();
+        }
         // stomp client
     }, [roomId]);
 
@@ -83,21 +125,31 @@ const [stompClient, setStompClient] = useState(null)
         if(stompClient && connected && input.trim()){
              console.log(input);
         }
+        
+        
         const message = {
-            sender : currentUser,
-            content: input,
-            roomId : roomId
-        };
+            sender:currentUser,
+            content:input,
+            roomId:roomId 
+        }
         // 1. Local state update
         // setMessages(prev => [...prev, message]);
 
          // 2. Server-এ পাঠানো
-        stompClient.send(
-            `/app/sendMessage/${roomId}`, 
-            {}, 
-            JSON.stringify(message)
-        );
-        setInput("");
+        stompClient.send(`/app/sendMessage/${roomId}`, {}, JSON.stringify(message));
+        setInput("")
+    };
+
+
+    // handle logout
+
+    function handleLogout(){
+        stompClient.disconnect();
+        setConnected(false);
+        setRoomId('');
+        setCurrentUser("");
+        toast.success("loged out");
+        navigate('/');
     }
 
 
@@ -108,37 +160,39 @@ const [stompClient, setStompClient] = useState(null)
                 {/* Room name  container*/}
                 <div>
                     <h1 className="text-xl font-semibold">
-                        Room : <span> Family Room</span>
+                        Room : <span> {roomId} </span>
                     </h1>
                 </div>
 
                 {/* Username container*/}
                 <div>
                     <h1 className="text-xl font-semibold">
-                        User : <span>Ali Hossain</span>
+                        User : <span>{currentUser}</span>
                     </h1>
                 </div>
             
                 {/* Leave room  */}
-                <div className="dark:bg-red-800 hover:dark:bg-red-500 px-3 py-2 rounded-full">
-                    <button> Leave Room</button>
+                <div >
+                    <button onClick={handleLogout} className="dark:bg-red-800 hover:dark:bg-red-500 px-3 py-2 rounded-full"> 
+                        Leave Room</button>
                 </div>
             </header>
 
 
             {/* message area  */}
-            <main className="py-20 px-10 w-2/3 dark:bg-slate-600 mx-auto h-screen border overflow-auto">
+            <main ref={chatBoxRef} className="py-20 px-10 w-2/3 dark:bg-slate-600 mx-auto h-screen border overflow-auto">
                 {
                     messages.map((message, index) =>(
                         <div key={index} className={`flex ${message.sender === currentUser ? "justify-end" : "justify-start" }`}>
 
                             <div className={` my-2 ${message.sender === currentUser ? "bg-green-800 ": "bg-gray-800"} max-w-xs  p-2 rounded`}>
                                 <div className="flex flex-row gap-2">
-                                        <img className="h-10 w-10" src={"https://avatar.iran.liara.run/public/18"} alt="Something is wrong"/>
+                                        <img className="h-10 w-10" src={"https://avatar.iran.liara.run/public/18"} alt=""/>
 
                                     <div className="flex flex-col gap-1">
                                         <p className="text-sm font-bold">{message.sender} </p>
                                         <p>{message.content} </p>
+                                        <p className="text-xs text-gray-300">{timeAgo(message.timeStamp)}</p>
                                     </div>
 
                                 </div>
@@ -157,6 +211,12 @@ const [stompClient, setStompClient] = useState(null)
                             value={input}
                             onChange={(e) => {
                                 setInput(e.target.value);
+                            }}
+
+                            onKeyDown={(e) => {
+                                if(e.key === "Enter"){
+                                    sendMessage();
+                                }
                             }}
                             type="text" 
                             placeholder="Type your message here..." 

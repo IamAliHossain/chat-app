@@ -8,12 +8,10 @@ import { ChatProvider } from './context/ChatContext.jsx'
 
 
 createRoot(document.getElementById('root')).render(
-
     <BrowserRouter>
       <Toaster position='top-center'/>
       <ChatProvider >
         <AppRoutes />
       </ChatProvider>
     </BrowserRouter>
-
 )

@@ -23,7 +23,7 @@ const JoinCreateChat = ()=> {
 
     function validateForm(){
         if(detail.roomId === "" || detail.userName === ""){
-            toast.error("Invalid Inputn !!")
+            toast.error("Invalid Input !!")
             return false;
         }
         return true;

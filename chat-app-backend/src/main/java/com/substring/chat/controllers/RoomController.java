@@ -15,16 +15,23 @@ import java.util.List;
 public class RoomController {
 
     private RoomRepository  roomRepository;
+
+
     public RoomController(RoomRepository roomRepository){
         this.roomRepository = roomRepository;
     }
+
+
     // create rooms
     @PostMapping
     public ResponseEntity<?> createRoom(@RequestBody String roomId){
+
         if(roomRepository.findByRoomId(roomId) != null){
             // room is already there
             return ResponseEntity.badRequest().body("Room already exist!");
         }
+
+
         // otherwise create new room
         Room room =new Room();
         room.setRoomId(roomId);
@@ -33,24 +40,26 @@ public class RoomController {
 
     }
 
+
+
     // get room : join
     @GetMapping("/{roomId}")
     public ResponseEntity<?> joinRoom(
             @PathVariable String roomId
     ){
-       Room room = roomRepository.findByRoomId(roomId);
 
+       Room room = roomRepository.findByRoomId(roomId);
        if(room == null){
-           return ResponseEntity.badRequest().body("Room not found!");
+           return ResponseEntity.badRequest()
+                   .body("Room not found!");
        }
 
        return ResponseEntity.ok(room);
-
     }
+
 
     // get messages of room
     @GetMapping("/{roomId}/messages")
-
     public ResponseEntity<List<Message>> getMessages(
             @PathVariable String roomId,
             // doing pagination : study more

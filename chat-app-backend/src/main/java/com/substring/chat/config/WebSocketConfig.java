@@ -25,6 +25,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // server-side method controll korar jonnno prefix set kora hoy
         config.setApplicationDestinationPrefixes("/app");
+
+        // server-side : @MessagingMapping("/chat")
     }
 
     @Override
@@ -34,7 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/chat")
                 .setAllowedOrigins("http://localhost:5173")
                 .withSockJS();
-
-
     }
+
+    // chat endpoint e connection establish hobe
 }
