@@ -14,6 +14,7 @@ const JoinCreateChat = ()=> {
     const {roomId, userName, setCurrentUser, setRoomId, setConnected} = useChatContext(); 
     const navigate =useNavigate()
 
+    
     function handleFormInputChange(event){
        setDetail({
             ...detail,

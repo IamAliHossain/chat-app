@@ -6,6 +6,8 @@ import AppRoutes from './config/routes.jsx'
 import { Toaster } from 'react-hot-toast'
 import { ChatProvider } from './context/ChatContext.jsx'
 
+// strictmode is deleted from here to avoid duplicate messaage from sender end
+
 
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>
