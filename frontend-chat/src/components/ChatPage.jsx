@@ -31,6 +31,8 @@ const ChatPage = () => {
 
 
     const [messages, setMessages] = useState([
+
+        
     // {
     //     content : "hello ?",
     //     sender : "Hasan Morshed",
@@ -119,7 +121,6 @@ const [stompClient, setStompClient] = useState(null)
         // stomp client
     }, [roomId]);
 
-
     // send message handle 
     const sendMessage = async() =>{
         if(stompClient && connected && input.trim()){
@@ -132,10 +133,8 @@ const [stompClient, setStompClient] = useState(null)
             content:input,
             roomId:roomId 
         }
-        // 1. Local state update
-        // setMessages(prev => [...prev, message]);
 
-         // 2. Server-এ পাঠানো
+         // 1. Server-এ পাঠানো
         stompClient.send(`/app/sendMessage/${roomId}`, {}, JSON.stringify(message));
         setInput("")
     };
